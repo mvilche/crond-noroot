@@ -1,6 +1,9 @@
 version: '3.7'
 services:
   crond:
+    build:
+     context: dockerfiles
+     dockerfile: Dockerfile
     image: mvilche/crond-noroot:alpine3.9
     environment:
      - TIMEZONE=America/Montevideo

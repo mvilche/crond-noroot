@@ -5,9 +5,9 @@ echo "MARTIN FABRIZZIO VILCHE - https://github.com/mvilche"
 echo "···································································································"
 APP_NAME=GO-CROND
 
-if [ ! -s /opt/crond/crontab ]; then
+if [ ! -s /opt/custom_crontab/crontab ]; then
 
-if [ ! -O /opt/crond/crontab ]; then
+if [ ! -O /opt/custom_crontab/crontab ]; then
   echo "···································································································"
   echo "PERMISO DENEGADO AL ACCEDER AL ARCHIVO DE CONTRAB"
   echo "SI ESTA UTILIZANDO EL ARCHIVO DESDE UN CONFIGMAP O VOLUMEN, EL MISMO NO PUEDE ESTAR VACIO"
@@ -18,19 +18,20 @@ echo "·····································
 echo "NO SE ENCONTRO ARCHIVO CONTRAB - USANDO POR DEFECTO.."
 echo "···································································································"
 echo ""
-cat << EOF > /opt/crond/crontab
+cat << EOF > /usr/share/crond/crontab
 # comment
 # EJEMPLO DE CONTRAB
 SHELL=/bin/sh
 * * * * * 1001 sleep 5 && id >> /tmp/test-1
 EOF
-cat /opt/crond/crontab
+cat /usr/share/crond/crontab
 echo "···································································································"
 else
 echo "···································································································"
 echo "ARCHIVO CONTRAB ENCONTRADO..."
+cat /opt/custom_crontab/crontab > /usr/share/crond/crontab
 echo ""
-cat /opt/crond/crontab
+cat /usr/share/crond/crontab
 echo "···································································································"
 fi
 

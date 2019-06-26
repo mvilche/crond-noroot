@@ -9,10 +9,9 @@ RUN go get \
 
 FROM alpine:3.9
 COPY --from=builder /go/src/go-crond/go-crond /usr/bin/go-crond
-RUN apk add --update --no-cache curl tzdata && rm -rf /etc/localtime && mkdir -p /opt/crond && touch /opt/crond/crontab /etc/localtime /etc/timezone && \
-chown 1001:1001 -R /opt/crond /etc/localtime /etc/timezone && chmod +x  /usr/bin/go-crond
+RUN apk add --update --no-cache curl tzdata && rm -rf /etc/localtime && mkdir -p /opt/crond /usr/share/crond /opt/custom_crontab && touch /etc/localtime /etc/timezone /usr/share/crond/crontab /opt/custom_crontab/crontab && \
+chown 1001:1001 -R /etc/localtime /etc/timezone /usr/share/crond /opt/custom_crontab && chmod +x /usr/bin/go-crond
 COPY run.sh /usr/bin/run.sh
-WORKDIR /opt/crond
 USER 1001
 ENTRYPOINT ["/usr/bin/run.sh"]
-CMD ["/opt/crond/crontab"]
+CMD ["/usr/share/crond/crontab"]
