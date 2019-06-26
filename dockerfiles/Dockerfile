@@ -14,6 +14,5 @@ chown 1001:1001 -R /opt/crond /etc/localtime /etc/timezone && chmod +x  /usr/bin
 COPY run.sh /usr/bin/run.sh
 WORKDIR /opt/crond
 USER 1001
-VOLUME ["/opt/crond"]
 ENTRYPOINT ["/usr/bin/run.sh"]
 CMD ["/opt/crond/crontab"]
