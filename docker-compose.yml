@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  crond:
+    image: mvilche/crond-noroot:alpine3.9
+    environment:
+     - TIMEZONE=America/Montevideo
+    networks:
+     - integracion
+
+networks:
+  integracion:
