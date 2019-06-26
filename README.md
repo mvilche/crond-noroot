@@ -17,7 +17,7 @@
 
 Para definir un archivo de crontab utilice un volumen, configs o configmap.
 
-/opt/crond/crontab
+/opt/custom_crontab/crontab
 
 
 ### Ejemplo de crontab
