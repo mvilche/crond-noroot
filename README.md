@@ -9,8 +9,6 @@
 
 - Non root container
 - Openshift ready!
-- Run with 1001 user id
-
 
 
 ## Definir tasks
@@ -31,13 +29,13 @@ docker run -d --name crond -v ./tasks:/opt/custom_tasks/tasks mvilche/crond-noro
 
 ```bash
 SHELL=/bin/sh
-* * * * * 1001 sleep 5 && id >> /tmp/test-1
+* * * * * crond sleep 5 && id >> /tmp/test-1
 ```
 #####  El archivo task utiliza la syntaxis del cron de linux :
 
  ```bash
 SHELL=/bin/sh
-dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
+dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) usuario(crond) commando(sleep 5 && id >> /tmp/test-1)
 ```
 
 

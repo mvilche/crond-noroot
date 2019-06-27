@@ -23,7 +23,7 @@ cat << EOF > /usr/share/crond/tasks
 
 SHELL=/bin/sh
 
-* * * * * 1001 sleep 5 && id >> /tmp/test-1
+* * * * * crond sleep 5 && id >> /tmp/test-1
 
 #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
 
@@ -58,4 +58,4 @@ fi
 
 echo "INICIANDO $APP_NAME...."
 sleep 5s
-exec go-crond --allow-unprivileged --no-auto --default-user=1001 --verbose "$@"
+exec go-crond --allow-unprivileged --no-auto --default-user=crond --verbose "$@"
