@@ -13,21 +13,34 @@
 
 
 
-## Definir crontab
+## Definir tasks
 
-Para definir un archivo de crontab utilice un volumen, configs o configmap.
+Para definir un archivo de tasks utilice un volumen, configs o configmap.
 
-/opt/custom_crontab/crontab
+Genere un archivo "tasks" con las tareas programadas e integrelo utilizando los métodos mencionados
 
-
-### Ejemplo de crontab
+Ejemplo
 
 ```bash
 
+docker run -d --name crond -v ./tasks:/opt/custom_tasks/tasks mvilche/crond-noroot:alpine3.9
+
+```
+
+### Ejemplo de archivo tasks
+
+```bash
 SHELL=/bin/sh
 * * * * * 1001 sleep 5 && id >> /tmp/test-1
 ```
-El servicio de cron es ejecutado con el usuario id 1001.
+#####  El archivo task utiliza la syntaxis del cron de linux :
+
+ ```bash
+SHELL=/bin/sh
+dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
+```
+
+
 
 
 ## Iniciar servicios

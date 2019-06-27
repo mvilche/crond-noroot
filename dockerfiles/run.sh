@@ -5,33 +5,37 @@ echo "MARTIN FABRIZZIO VILCHE - https://github.com/mvilche"
 echo "···································································································"
 APP_NAME=GO-CROND
 
-if [ ! -s /opt/custom_crontab/crontab ]; then
+if [ ! -s /opt/custom_tasks/tasks ]; then
 
-if [ ! -O /opt/custom_crontab/crontab ]; then
+if [ ! -O /opt/custom_tasks/tasks ]; then
   echo "···································································································"
-  echo "PERMISO DENEGADO AL ACCEDER AL ARCHIVO DE CONTRAB"
+  echo "PERMISO DENEGADO AL ACCEDER AL ARCHIVO DE TASKS"
   echo "SI ESTA UTILIZANDO EL ARCHIVO DESDE UN CONFIGMAP O VOLUMEN, EL MISMO NO PUEDE ESTAR VACIO"
   exit 1
   echo "···································································································"
 fi
 echo "···································································································"
-echo "NO SE ENCONTRO ARCHIVO CONTRAB - USANDO POR DEFECTO.."
+echo "NO SE ENCONTRO ARCHIVO TASKS - USANDO POR DEFECTO.."
 echo "···································································································"
 echo ""
-cat << EOF > /usr/share/crond/crontab
-# comment
-# EJEMPLO DE CONTRAB
+cat << EOF > /usr/share/crond/tasks
+# EJEMPLO DE TASKS
+
 SHELL=/bin/sh
+
 * * * * * 1001 sleep 5 && id >> /tmp/test-1
+
+#dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
+
 EOF
-cat /usr/share/crond/crontab
+cat /usr/share/crond/tasks
 echo "···································································································"
 else
 echo "···································································································"
-echo "ARCHIVO CONTRAB ENCONTRADO..."
-cat /opt/custom_crontab/crontab > /usr/share/crond/crontab
+echo "ARCHIVO TASKS ENCONTRADO..."
+cat /opt/custom_tasks/tasks > /usr/share/crond/tasks
 echo ""
-cat /usr/share/crond/crontab
+cat /usr/share/crond/tasks
 echo "···································································································"
 fi
 
