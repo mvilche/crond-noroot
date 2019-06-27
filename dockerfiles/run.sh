@@ -6,14 +6,6 @@ echo "·····································
 APP_NAME=GO-CROND
 
 if [ ! -s /opt/custom_tasks/tasks ]; then
-
-if [ ! -O /opt/custom_tasks/tasks ]; then
-  echo "···································································································"
-  echo "PERMISO DENEGADO AL ACCEDER AL ARCHIVO DE TASKS"
-  echo "SI ESTA UTILIZANDO EL ARCHIVO DESDE UN CONFIGMAP O VOLUMEN, EL MISMO NO PUEDE ESTAR VACIO"
-  exit 1
-  echo "···································································································"
-fi
 echo "···································································································"
 echo "NO SE ENCONTRO ARCHIVO TASKS - USANDO POR DEFECTO.."
 echo "···································································································"
@@ -38,8 +30,6 @@ echo ""
 cat /usr/share/crond/tasks
 echo "···································································································"
 fi
-
-
 
 
 if [ -z "$TIMEZONE" ]; then
