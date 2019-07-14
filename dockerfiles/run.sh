@@ -4,33 +4,20 @@ echo "·····································
 echo "MARTIN FABRIZZIO VILCHE - https://github.com/mvilche"
 echo "···································································································"
 APP_NAME=GO-CROND
-
-if [ ! -s /opt/custom_tasks/tasks ]; then
-echo "···································································································"
-echo "NO SE ENCONTRO ARCHIVO TASKS - USANDO POR DEFECTO.."
-echo "···································································································"
-echo ""
-cat << EOF > /usr/share/crond/tasks
+cat << EOF > /tmp/example_tasks
 # EJEMPLO DE TASKS
 
 SHELL=/bin/sh
 
-* * * * * crond sleep 5 && id >> /tmp/test-1
+* * * * * 1001 sleep 5 && id >> /tmp/test-1
 
 #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
 
 EOF
-cat /usr/share/crond/tasks
+cat /tmp/example_tasks
 echo "···································································································"
-else
+echo "AGREGUE SUS TAREAS PROGRAMADAS A /usr/share/crond/ CON EL FORMATO MOSTRADO EN EL EJEMPLO"
 echo "···································································································"
-echo "ARCHIVO TASKS ENCONTRADO..."
-cat /opt/custom_tasks/tasks > /usr/share/crond/tasks
-echo ""
-cat /usr/share/crond/tasks
-echo "···································································································"
-fi
-
 
 if [ -z "$TIMEZONE" ]; then
 echo "···································································································"
@@ -48,4 +35,4 @@ fi
 
 echo "INICIANDO $APP_NAME...."
 sleep 5s
-exec go-crond --allow-unprivileged --no-auto --default-user=crond --verbose "$@"
+exec go-crond --allow-unprivileged --no-auto --verbose --include="$@"

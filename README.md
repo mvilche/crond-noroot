@@ -21,7 +21,7 @@ Ejemplo
 
 ```bash
 
-docker run -d --name crond -v ./tasks:/opt/custom_tasks/tasks mvilche/crond-noroot:alpine3.9
+docker run -d --name crond -v ./tasks:/usr/share/crond/tasks mvilche/crond-noroot:alpine3.9
 
 ```
 
