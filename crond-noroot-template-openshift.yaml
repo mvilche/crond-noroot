@@ -27,7 +27,7 @@
     data:
       tasks: |-
         # EJEMPLO DE TASKS
-        SHELL=/bin/sh
+        SHELL=/bin/bash
         * * * * * 1001 sleep 5 && id >> /tmp/test-1
         #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)           
     kind: ConfigMap
@@ -49,20 +49,8 @@
         deploymentconfig: crond-tasks
       strategy:
         activeDeadlineSeconds: 21600
-        resources:
-          requests:
-            cpu: 500m
-            memory: 1Gi
-          limits:
-            cpu: 1
-            memory: 2Gi
-        rollingParams:
-          intervalSeconds: 1
-          maxSurge: 25%
-          maxUnavailable: 25%
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: Rolling
+        resources: {}
+        type: Recreate
       template:
         metadata:
           labels:
@@ -70,29 +58,63 @@
             deploymentconfig: crond-tasks
         spec:
           containers:
+            - env:
+                - name: TIMEZONE
+                  value: America/Montevideo          
               image: "crond-tasks:latest"
               imagePullPolicy: Always
               name: crond-tasks
-              resources:
-                requests:
-                  cpu: 500m
-                  memory: 128Gi
-                limits:
-                  cpu: 1
-                  memory: 1Gi                           
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              command:
+              - bash
+              - "-c"
+              - |
+                set -e
+                echo '···································································································'
+                echo 'MARTIN FABRIZZIO VILCHE - https://github.com/mvilche'
+                echo '···································································································'
+                APP_NAME=GO-CROND
+                cat << EOF > /tmp/example_tasks
+                # EJEMPLO DE TASKS
+                SHELL=/bin/sh
+                * * * * * 1001 sleep 5 && id >> /tmp/test-1
+                #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
+                EOF
+                cat /tmp/example_tasks
+                echo '···································································································'
+                echo 'AGREGUE SUS TAREAS PROGRAMADAS A /usr/share/crond/ CON EL FORMATO MOSTRADO EN EL EJEMPLO'
+                echo '···································································································'
+                if [ -z '$TIMEZONE' ]; then
+                echo '···································································································'
+                echo 'VARIABLE TIMEZONE NO SETEADA - INICIANDO CON VALORES POR DEFECTO'
+                echo 'POSIBLES VALORES: America/Montevideo | America/El_Salvador'
+                echo '···································································································'
+                else
+                echo '···································································································'
+                echo 'TIMEZONE SETEADO ENCONTRADO: ' $TIMEZONE
+                echo '···································································································'
+                cat /usr/share/zoneinfo/$TIMEZONE > /etc/localtime && \
+                echo $TIMEZONE > /etc/timezone
+                fi
+                echo 'INICIANDO $APP_NAME....'
+                sleep 5s
+                exec go-crond --allow-unprivileged --no-auto --verbose --include=/usr/share/crond                           
               volumeMounts:
-              - name: tasks
-                mountPath: /usr/share/crond
-                terminationMessagePath: /dev/termination-log
-                terminationMessagePolicy: File
+                - mountPath: /usr/share/crond
+                  name: tasks
           dnsPolicy: ClusterFirst
-          volumes:
-          - name: tasks
-            configMap:
-              name: tasks          
           restartPolicy: Always
           schedulerName: default-scheduler
           terminationGracePeriodSeconds: 30
+          volumes:
+            - configMap:
+                defaultMode: 420
+                items:
+                  - key: tasks
+                    path: tasks
+                name: tasks
+              name: tasks
       test: false
       triggers:
         - type: ConfigChange
@@ -153,42 +175,46 @@
     metadata:
       labels:
         app: crond-tasks
-        build: crond-tasks
       name: crond-tasks
     spec:
-      failedBuildsHistoryLimit: 5
-      nodeSelector: null
+      completionDeadlineSeconds: 1800
       output:
         to:
           kind: ImageStreamTag
-          name: 'crond-tasks:latest'
-      postCommit: {}
-      resources: {}
-      runPolicy: Serial
+          name: crond-tasks:latest
       source:
-        contextDir: .
-        git:
-          ref: master
-          uri: 'https://github.com/mvilche/crond-noroot.git'
-        type: Git
+        type: Dockerfile
+        dockerfile: |-
+                FROM alpine:3.10
+                USER root
+                COPY go-crond /usr/bin/go-crond                
+                RUN apk add --update --no-cache bash curl postgresql tzdata
+                RUN rm -rf /etc/localtime && mkdir -p /usr/share/crond && \
+                touch /etc/localtime /etc/timezone && \
+                chown 1001 -R /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond && \
+                chgrp -R 0 /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond && \
+                chmod +x /usr/bin/go-crond && \
+                chmod -R g=u /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond
+                USER 1001
         images:
         - from:
             kind: ImageStreamTag
             name: crond-tasks-go:latest
           paths:
           - sourcePath: /go/src/go-crond/go-crond
-            destinationDir: "."    
+            destinationDir: "."
       strategy:
         dockerStrategy:
-          dockerfilePath: Dockerfile-crond
+          from:
+            kind: ImageStreamTag
+            name: crond-tasks-go:latest
         type: Docker
-      successfulBuildsHistoryLimit: 5
       triggers:
       - type: "imageChange"
         imageChange:
           from:
             kind: "ImageStreamTag"
-            name: "crond-tasks-go:latest"         
+            name: "crond-tasks-go:latest"     
 
   - apiVersion: v1
     kind: ImageStream
