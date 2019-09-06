@@ -1,0 +1,199 @@
+    ##comienzo Template
+  apiVersion: v1
+  kind: Template
+  metadata:
+    name: crond-openshift-mvilche
+    labels:
+      template: crond-openshift-mvilche
+      autor: "Martin_Fabrizzio_Vilche"
+    annotations:
+      openshift.io/display-name: "crond-openshift-mvilche"
+      iconClass: "icon-github"
+      description: >-
+        Go Crond Task non root
+        Martin Fabrizzio Vilche.
+        https://github.com/mvilche.
+
+  objects:
+
+
+##################### CROND
+
+
+
+
+
+  - apiVersion: v1
+    data:
+      tasks: |-
+        # EJEMPLO DE TASKS
+        SHELL=/bin/sh
+        * * * * * 1001 sleep 5 && id >> /tmp/test-1
+        #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)           
+    kind: ConfigMap
+    metadata:
+      name: tasks
+
+
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: "crond-tasks"
+      name: "crond-tasks"
+    spec:
+      replicas: 1
+      revisionHistoryLimit: 10
+      selector:
+        app: crond-tasks
+        deploymentconfig: crond-tasks
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          labels:
+            app: crond-tasks
+            deploymentconfig: crond-tasks
+        spec:
+          containers:
+              image: "crond-tasks:latest"
+              imagePullPolicy: Always
+              name: crond-tasks
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 128Gi
+                limits:
+                  cpu: 1
+                  memory: 1Gi                           
+              volumeMounts:
+              - name: tasks
+                mountPath: /usr/share/crond
+                terminationMessagePath: /dev/termination-log
+                terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          volumes:
+          - name: tasks
+            configMap:
+              name: tasks          
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - crond-tasks
+            from:
+              kind: ImageStreamTag
+              name: "crond-tasks:latest"
+          type: ImageChange
+
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: crond-tasks-go
+        build: crond-tasks-go
+      name: crond-tasks-go
+    spec:
+      failedBuildsHistoryLimit: 5
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: 'crond-tasks-go:latest'
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: .
+        git:
+          ref: master
+          uri: 'https://github.com/mvilche/crond-noroot.git'
+        type: Git
+      strategy:
+        dockerStrategy:
+          dockerfilePath: Dockerfile-go
+        type: Docker
+      successfulBuildsHistoryLimit: 5
+      triggers:
+        - type: ConfigChange
+
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      labels:
+        app: crond-tasks-go
+      name: crond-tasks-go
+    spec: {}
+
+
+
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: crond-tasks
+        build: crond-tasks
+      name: crond-tasks
+    spec:
+      failedBuildsHistoryLimit: 5
+      nodeSelector: null
+      output:
+        to:
+          kind: ImageStreamTag
+          name: 'crond-tasks:latest'
+      postCommit: {}
+      resources: {}
+      runPolicy: Serial
+      source:
+        contextDir: .
+        git:
+          ref: master
+          uri: 'https://github.com/mvilche/crond-noroot.git'
+        type: Git
+        images:
+        - from:
+            kind: ImageStreamTag
+            name: crond-tasks-go:latest
+          paths:
+          - sourcePath: /go/src/go-crond/go-crond
+            destinationDir: "."    
+      strategy:
+        dockerStrategy:
+          dockerfilePath: Dockerfile-crond
+        type: Docker
+      successfulBuildsHistoryLimit: 5
+      triggers:
+      - type: "imageChange"
+        imageChange:
+          from:
+            kind: "ImageStreamTag"
+            name: "crond-tasks-go:latest"         
+
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      labels:
+        app: crond-tasks
+      name: crond-tasks
+    spec: {}
