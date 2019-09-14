@@ -28,7 +28,7 @@
       tasks: |-
         # EJEMPLO DE TASKS
         SHELL=/bin/bash
-        * * * * * 1001 sleep 5 && id >> /tmp/test-1
+        * * * * * 1001 bash -c "sleep 5 && id >> /tmp/test-1"
         #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)           
     kind: ConfigMap
     metadata:
@@ -188,13 +188,13 @@
                 FROM alpine:3.10
                 USER root
                 COPY go-crond /usr/bin/go-crond                
-                RUN apk add --update --no-cache bash curl postgresql tzdata
-                RUN rm -rf /etc/localtime && mkdir -p /usr/share/crond && \
+                RUN apk add --update --no-cache bash curl mailx shadow busybox-suid postgresql tzdata
+                RUN adduser -u 1001 -D crond && rm -rf /etc/localtime && mkdir -p /usr/share/crond /tmp/logs && \
                 touch /etc/localtime /etc/timezone && \
-                chown 1001 -R /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond && \
-                chgrp -R 0 /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond && \
+                chown 1001 -R /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs && \
+                chgrp -R 0 /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs && \
                 chmod +x /usr/bin/go-crond && \
-                chmod -R g=u /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond
+                chmod -R g=u /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs
                 USER 1001
         images:
         - from:
