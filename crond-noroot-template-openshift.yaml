@@ -29,7 +29,7 @@
         # EJEMPLO DE TASKS
         SHELL=/bin/bash
         * * * * * 1001 bash -c "sleep 5 && id >> /tmp/test-1"
-        #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)           
+        #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
     kind: ConfigMap
     metadata:
       name: tasks
@@ -60,7 +60,7 @@
           containers:
             - env:
                 - name: TIMEZONE
-                  value: America/Montevideo          
+                  value: America/Montevideo
               image: "crond-tasks:latest"
               imagePullPolicy: Always
               name: crond-tasks
@@ -99,7 +99,7 @@
                 fi
                 echo 'INICIANDO $APP_NAME....'
                 sleep 5s
-                exec go-crond --allow-unprivileged --no-auto --verbose --include=/usr/share/crond                           
+                exec go-crond --allow-unprivileged --no-auto --verbose --include=/usr/share/crond
               volumeMounts:
                 - mountPath: /usr/share/crond
                   name: tasks
@@ -132,48 +132,6 @@
     kind: BuildConfig
     metadata:
       labels:
-        app: crond-tasks-go
-        build: crond-tasks-go
-      name: crond-tasks-go
-    spec:
-      failedBuildsHistoryLimit: 5
-      nodeSelector: null
-      output:
-        to:
-          kind: ImageStreamTag
-          name: 'crond-tasks-go:latest'
-      postCommit: {}
-      resources: {}
-      runPolicy: Serial
-      source:
-        contextDir: .
-        git:
-          ref: master
-          uri: 'https://github.com/mvilche/crond-noroot.git'
-        type: Git
-      strategy:
-        dockerStrategy:
-          dockerfilePath: Dockerfile-go
-        type: Docker
-      successfulBuildsHistoryLimit: 5
-      triggers:
-        - type: ConfigChange
-
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      labels:
-        app: crond-tasks-go
-      name: crond-tasks-go
-    spec: {}
-
-
-
-
-  - apiVersion: v1
-    kind: BuildConfig
-    metadata:
-      labels:
         app: crond-tasks
       name: crond-tasks
     spec:
@@ -187,34 +145,24 @@
         dockerfile: |-
                 FROM alpine:3.10
                 USER root
-                COPY go-crond /usr/bin/go-crond                
-                RUN apk add --update --no-cache bash curl mailx shadow busybox-suid postgresql tzdata
-                RUN adduser -u 1001 -D crond && rm -rf /etc/localtime && mkdir -p /usr/share/crond /tmp/logs && \
+                RUN apk add --update --no-cache bash wget curl mailx shadow busybox-suid postgresql tzdata
+                RUN wget https://github.com/mvilche/go-crond/releases/download/0.6.2/go-crond-64-linux && mv go-crond-64-linux /usr/bin/go-crond && \
+                adduser -u 1001 -D crond && rm -rf /etc/localtime && mkdir -p /usr/share/crond /tmp/logs && \
                 touch /etc/localtime /etc/timezone && \
                 chown 1001 -R /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs && \
                 chgrp -R 0 /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs && \
                 chmod +x /usr/bin/go-crond && \
                 chmod -R g=u /home/crond /etc/localtime /etc/timezone /usr/share/crond /usr/bin/go-crond /tmp/logs
                 USER 1001
-        images:
-        - from:
-            kind: ImageStreamTag
-            name: crond-tasks-go:latest
-          paths:
-          - sourcePath: /go/src/go-crond/go-crond
-            destinationDir: "."
       strategy:
         dockerStrategy:
           from:
-            kind: ImageStreamTag
-            name: crond-tasks-go:latest
+            kind: DockerImage
+            name: alpine:3.10
         type: Docker
       triggers:
-      - type: "imageChange"
-        imageChange:
-          from:
-            kind: "ImageStreamTag"
-            name: "crond-tasks-go:latest"     
+        - type: "ConfigChange"
+
 
   - apiVersion: v1
     kind: ImageStream
