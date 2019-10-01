@@ -10,6 +10,7 @@
 - Non root container
 - Openshift ready!
 - Configmap para el seteo de cron
+- Notificaciones por email
 
 
 ### Ejemplo de archivo tasks
