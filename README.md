@@ -37,11 +37,11 @@ oc create -f crond-noroot-template-openshift.yaml
 
 ## Notificaciones por email
 
-Para activar el envio de notificaciones por email del resultado de las ejecuciones agregar el archivo config.ini.
+Para activar el envio de notificaciones por email del resultado de las ejecuciones edite el configmap task y descomente las lineas en config.ini.
 
 ```bash
 
-touch /usr/share/crond/config.ini
+oc edit configmap tasks
 
 ```
 

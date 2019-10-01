@@ -31,11 +31,11 @@
         * * * * * 1001 bash -c "sleep 5 && id >> /tmp/test-1"
         #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
       config.ini: |-
-        Mailuser="mail@mail.com"
-        Mailpassword="password"
-        Mailhost="host.com.uy"
-        Mailport=25
-        Maildestinos="mail@mail.com"
+        #Mailuser="mail@mail.com"
+        #Mailpassword="password"
+        #Mailhost="host.com.uy"
+        #Mailport=25
+        #Maildestinos="mail@mail.com"
     kind: ConfigMap
     metadata:
       name: tasks
