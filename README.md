@@ -54,6 +54,7 @@ Mailpassword="password"
 Mailhost="host.com.uy"
 Mailport=25
 Maildestinos="mail@mail.com"
+Ambiente="TEST"
 
 ```
 
