@@ -6,13 +6,19 @@
     labels:
       template: crond-openshift-mvilche
       autor: "Martin_Fabrizzio_Vilche"
-    annotations:
-      openshift.io/display-name: "crond-openshift-mvilche"
-      iconClass: "icon-github"
-      description: >-
-        Go Crond Task non root
-        Martin Fabrizzio Vilche.
-        https://github.com/mvilche.
+      annotations:
+        openshift.io/display-name: "crond-openshift-mvilche"
+        iconClass: "icon-github"
+        description: >-
+          GO CROND TASKS NON ROOT - OPENSHIFT
+          Martin Fabrizzio Vilche.
+          https://github.com/mvilche.
+        openshift.io/provider-display-name: "Martin Fabrizzio Vilche"
+        openshift.io/documentation-url: "https://github.com/mvilche/crond-noroot.git"
+        openshift.io/support-url: "https://github.com/mvilche/crond-noroot.git"
+    message: >-
+      Los servicios iniciarán en un par de minutos...
+      Martin Fabrizzio Vilche        
 
   objects:
 
@@ -110,6 +116,29 @@
               volumeMounts:
                 - mountPath: /usr/share/crond
                   name: tasks
+              livenessProbe:
+                exec:
+                  command:
+                    - bash
+                    - '-c'
+                    - pidof go-crond
+                failureThreshold: 3
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              readinessProbe:
+                exec:
+                  command:
+                    - bash
+                    - '-c'
+                    - |
+                      pidof go-crond
+                failureThreshold: 3
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5                  
           dnsPolicy: ClusterFirst
           restartPolicy: Always
           schedulerName: default-scheduler
