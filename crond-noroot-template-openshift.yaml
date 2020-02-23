@@ -117,12 +117,14 @@
             - configMap:
                 name: go-tasks
                 items:
-                - key: tasks       
+                - key: tasks
+                  path: tasks       
               name: go-tasks-crontabs
             - configMap:
                 name: go-tasks
                 items:
-                - key: config.ini               
+                - key: config.ini
+                  path: config.ini             
               name: go-tasks-config              
       test: false
       triggers:
