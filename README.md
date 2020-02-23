@@ -17,6 +17,8 @@
 
 ```bash
 SHELL=/bin/bash
+###SEND EMAIL AFTER EXECUTION true | false
+EMAIL_NOTIFICACION=true
 * * * * * 1001 sleep 5 && id >> /tmp/test-1
 ```
 #####  El archivo task utiliza la syntaxis del cron de linux :
