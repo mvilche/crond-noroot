@@ -34,18 +34,20 @@
       tasks: |-
         # EJEMPLO DE TASKS
         SHELL=/bin/bash
+        #### true | false 
+        EMAIL_NOTIFICACION=false
         * * * * * 1001 bash -c "sleep 5 && id >> /tmp/test-1"
         #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
       config.ini: |-
-        // Mailuser="mail@mail.com"
-        // Mailpassword="password"
-        // Mailhost="host.com.uy"
-        // Mailport=25
-        // Maildestinos="mail@mail.com"
-        // Ambiente="TEST"
+        Mailuser="mail@mail.com"
+        Mailpassword="password"
+        Mailhost="host.com.uy"
+        Mailport=25
+        Maildestinos="mail@mail.com"
+        Ambiente="TEST"
     kind: ConfigMap
     metadata:
-      name: tasks
+      name: go-tasks
 
 
   - apiVersion: v1
@@ -80,14 +82,16 @@
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               volumeMounts:
-                - mountPath: /usr/share/crond
-                  name: tasks
+                - mountPath: /opt/crontabs
+                  name: go-tasks-crontabs
+                - mountPath: /opt/config
+                  name: go-tasks-config                
               livenessProbe:
                 exec:
                   command:
                     - bash
                     - '-c'
-                    - pidof go-crond
+                    - pidof /usr/bin/go-tasks
                 failureThreshold: 3
                 initialDelaySeconds: 5
                 periodSeconds: 10
@@ -99,7 +103,7 @@
                     - bash
                     - '-c'
                     - |
-                      pidof go-crond
+                      pidof /usr/bin/go-tasks
                 failureThreshold: 3
                 initialDelaySeconds: 5
                 periodSeconds: 10
@@ -111,8 +115,15 @@
           terminationGracePeriodSeconds: 30
           volumes:
             - configMap:
-                name: tasks
-              name: tasks
+                name: go-tasks
+                items:
+                - key: tasks       
+              name: go-tasks-crontabs
+            - configMap:
+                name: go-tasks
+                items:
+                - key: config.ini               
+              name: go-tasks-config              
       test: false
       triggers:
         - type: ConfigChange

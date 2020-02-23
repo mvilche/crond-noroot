@@ -8,6 +8,7 @@ APP_NAME=GO-CROND
 cat << EOF > /tmp/example_tasks
 # EJEMPLO DE TASKS
 SHELL=/bin/sh
+EMAIL_NOTIFICACION=false
 * * * * * 1001 sleep 5 && id >> /tmp/test-1
 #dia(*) hora(*) dia_del_mes(*) mes(*) dia_semana(*) id_usuario(1001) commando(sleep 5 && id >> /tmp/test-1)
 EOF
@@ -29,4 +30,4 @@ echo $TIMEZONE > /etc/timezone
 fi
 echo 'INICIANDO $APP_NAME....'
 sleep 5s
-exec go-crond --allow-unprivileged --no-auto --verbose --include=/usr/share/crond
+exec /usr/bin/go-tasks --allow-unprivileged --no-auto --verbose --include=/opt/crontabs --configfile=/opt/config/config.ini
