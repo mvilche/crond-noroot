@@ -91,7 +91,7 @@
                   command:
                     - bash
                     - '-c'
-                    - pidof /usr/bin/go-tasks
+                    - pidof go-tasks
                 failureThreshold: 3
                 initialDelaySeconds: 5
                 periodSeconds: 10
@@ -103,7 +103,7 @@
                     - bash
                     - '-c'
                     - |
-                      pidof /usr/bin/go-tasks
+                      pidof go-tasks
                 failureThreshold: 3
                 initialDelaySeconds: 5
                 periodSeconds: 10
